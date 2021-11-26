@@ -1,0 +1,28 @@
+{
+  //   declarationDir & outDir & baseUrl указывать в локальных tsconfig
+  "compilerOptions": {
+    "declaration": true,
+    "sourceMap": true,
+    "strictNullChecks": true,
+    "module": "commonjs",
+    "target": "es2019",
+    "allowJs": false,
+    "resolveJsonModule": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "lib": ["es2019"],
+    "outDir": "./dist",
+    "declarationDir": "./dist/types/",
+
+    "typeRoots": [
+      "node_modules/@types"
+    ]
+  },
+  "include": [
+    "."
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
+
