@@ -1,0 +1,30 @@
+{
+  "name": "gitlab-automerge-worker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "config": {
+    "registry": "registry.kari.com/development/kari/kari/niki-gitlab-automerge"
+  },
+  "scripts": {
+    "ts-node": "./node_modules/.bin/ts-node  $1",
+    "start": "npm run ts-node ./index.ts",
+    "build": "rm -rf ./dist && ./node_modules/.bin/tsc",
+    "buildLocal": "npm run build && docker build -t $(npm run --silent getTagLocal) -f ./Dockerfile .",
+    "pushLocal": "sudo docker push $(npm run --silent getTagLocal)",
+    "cleanupLocal": "docker rmi -f $(npm run --silent getTagLocal) && rm -rf ./dist",
+    "getTagLocal": "node -e \"console.log(require('./package.json').config.registry + ':local');\"",
+    "deployLocal": "npm run buildLocal && npm run pushLocal && npm run cleanupLocal"
+  },
+  "author": "blynskyniki",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^16.11.10",
+    "prettier": "1.19.1",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.2"
+  }
+}
