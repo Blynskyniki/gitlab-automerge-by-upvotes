@@ -1,10 +1,9 @@
 import axios, { Axios, AxiosResponse } from 'axios';
+require('dotenv').config()
+const { CI_API_V4_URL , GITLAB_TOKEN  } = process.env;
+const TARGET_BRANCH_COMMA_SEPARATED = (process.env.TARGET_BRANCH_COMMA_SEPARATED || 'develop').split(',');
 
-const { CI_API_V4_URL = 'https://gitlab.kari.com/api/v4', GITLAB_TOKEN = 'secret' } = process.env;
-const TARGET_BRANCH_COMMA_SEPARATED = (process.env.TARGET_BRANCH_COMMA_SEPARATED || 'developp').split(',');
-const MINIMUN_UPVOTES_COUNT = Number.parseInt(process.env.MINIMUN_UPVOTES_COUNT || '2', 10);
-
-interface IMergeRequestInfo {
+export interface IMergeRequestInfo {
   title: string;
   description: string;
   target_branch: string;
@@ -25,6 +24,25 @@ interface IMergeRequestInfo {
   work_in_progress: boolean;
 }
 
+interface IAprovalsInfo {
+  user_has_approved: boolean;
+  user_can_approve: boolean;
+  approved: boolean;
+  approved_by: Array<{
+    user: {
+      id: number
+      name: string;
+      username: string;
+      state: string
+      avatar_url: string;
+      web_url: string;
+    }
+  }>;
+
+
+}
+
+
 export class GitlabRepository {
   static MERGE_SUCCESS_STATUS = 'can_be_merged';
 
@@ -35,8 +53,7 @@ export class GitlabRepository {
       mergeRequest.blocking_discussions_resolved &&
       !mergeRequest.draft &&
       !mergeRequest.work_in_progress &&
-      TARGET_BRANCH_COMMA_SEPARATED.includes(mergeRequest.target_branch) &&
-      mergeRequest.upvotes >= MINIMUN_UPVOTES_COUNT && mergeRequest.downvotes === 0;
+      TARGET_BRANCH_COMMA_SEPARATED.includes(mergeRequest.target_branch) ;
   }
 
   static toFlatMergeRequestInfo(mergeRequest: IMergeRequestInfo) {
@@ -89,18 +106,22 @@ export class GitlabRepository {
     this.instanse = axios.create({
       baseURL: CI_API_V4_URL,
       headers: {
-        'PRIVATE-TOKEN': GITLAB_TOKEN,
+        'PRIVATE-TOKEN': GITLAB_TOKEN!,
       },
     });
   }
 
-  public acceptMergeRequest(projectId: number, mergeRequestIId: number) {
+  public async acceptMergeRequest(projectId: number, mergeRequestIId: number) {
 
     return this.instanse.put<unknown>(`/projects/${projectId}/merge_requests/${mergeRequestIId}/merge?merge_when_pipeline_succeeds=true&should_remove_source_branch=true`);
   }
 
 
-  public getAllMergeRequests() {
+  public async getAllMergeRequests() {
     return this.instanse.get<unknown, AxiosResponse<IMergeRequestInfo[]>>('/merge_requests?state=opened&scope=all&target_branch=develop&order_by=updated_at');
+  }
+
+  public async getApprovalsFor(projesctId: number, mergeRequestId) {
+    return  this.instanse.get<unknown, AxiosResponse<IAprovalsInfo>>(`projects/${projesctId}/merge_requests/${mergeRequestId}/approvals`);
   }
 }

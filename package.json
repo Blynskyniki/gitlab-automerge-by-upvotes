@@ -19,7 +19,8 @@
   "author": "blynskyniki",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.24.0"
+    "axios": "^0.24.0",
+    "dotenv": "^10.0.0"
   },
   "devDependencies": {
     "@types/node": "^16.11.10",

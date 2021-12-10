@@ -5,7 +5,7 @@
 **/.nyc_output
 **/coverage
 /.scannerwork/
-
+.env
 ### macOS stuff
 .DS_Store
 .AppleDouble
